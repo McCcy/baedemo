@@ -3,8 +3,42 @@
 <head>
     <meta charset="UTF-8"/>
     <title>beademo</title>
+    <script src="../js/jquery.min.js"></script>
 </head>
 <body>
     BEA DEMO!!!!!22
+    <form>
+        姓名：<input id="name"/>
+        年龄：<input id="age"/>
+        <br/>
+    </form>
+    <button id="but">提交</button>
+    <script>
+
+
+        $("#but").click(function () {
+            var name = $('#name').val();
+            var age = $("#age").val();
+            var data = {
+                "name": name,
+                "age": age
+            }
+            var url = "http://localhost:8080/test"
+            // $.post(url,JSON.stringify(data),function (data) {
+            //     console.log(data)
+            // },'json')
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify(data),
+                contentType: "application/json",
+                dataType: "json",
+                success: function (msg) {
+                    console.log(msg)
+                }
+            })
+        })
+
+    </script>
 </body>
 </html>
