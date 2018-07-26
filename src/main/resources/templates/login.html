@@ -8,8 +8,8 @@
 <body>
     BEA DEMO!!!!!22
     <form>
-        姓名：<input id="name"/>
-        年龄：<input id="age"/>
+        账 号：<input id="username"/>
+        密 码：<input id="password"/>
         <br/>
     </form>
     <button id="but">提交</button>
@@ -17,22 +17,20 @@
 
 
         $("#but").click(function () {
-            var name = $('#name').val();
-            var age = $("#age").val();
+            var username = $('#username').val();
+            var password = $("#password").val();
             var data = {
-                "name": name,
-                "age": age
+                "username": username,
+                "password": password
             }
-            var url = "http://localhost:8080/test"
-            // $.post(url,JSON.stringify(data),function (data) {
-            //     console.log(data)
-            // },'json')
+            var url = "http://localhost:8080/dologin"
             $.ajax({
                 type: "POST",
                 url: url,
-                data: JSON.stringify(data),
-                contentType: "application/json",
-                dataType: "json",
+                // data: JSON.stringify(data),
+                data: data,
+                // contentType: "application/json",
+                // dataType: "json",
                 success: function (msg) {
                     console.log(msg)
                 }

@@ -1,17 +1,37 @@
 package com.kirito.demo.controller;
 
+import com.kirito.demo.constant.CookieConstant;
+import com.kirito.demo.constant.RedisConstant;
+import com.kirito.demo.entity.UserDO;
+import com.kirito.demo.service.UserService;
+import com.kirito.demo.untils.CookieUntil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by ccy on 2017/9/21.
  */
 @Controller
+@lombok.extern.slf4j.Slf4j
 public class MyController {
-    @RequestMapping("/index")
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+    @RequestMapping("/login")
     String index() {
-        return "index";
+        return "login";
     }
 
     @RequestMapping("/")
@@ -19,47 +39,23 @@ public class MyController {
         return "hello";
     }
 
-    @RequestMapping("/printers")
+    @PostMapping("/dologin")
     @ResponseBody
-    String test() {
-        String str = "[{\"id\": 1," +
-                "\"rid\": \"001\"," +
-                "\"printid\": \"0001\"," +
-                "\"name\": \"hgd\"," +
-                "\"mac\": \"001\"," +
-                "\"ipaddr\": \"10.90.102.162\"," +
-                "\"descp\": \"火锅店\"," +
-                "\"templateid\": \"01\"" +
-                "}, {" +
-                "\"id\": 2," +
-                "\"rid\": \"001\"," +
-                "\"printid\": \"0002\"," +
-                "\"name\": \"hgd\"," +
-                "\"mac\": \"001\"," +
-                "\"ipaddr\": \"10.90.102.162\"," +
-                "\"descp\": \"火锅店1\"," +
-                "\"templateid\": \"01\"" +
-                "}]";
-        return str;
-    }
+    public String dologin(@RequestParam String username,
+                          @RequestParam String password,
+                          HttpServletResponse response) {
+        try {
+            UserDO user = userService.findUser(username, password);
+            log.info("user: " + user.toString());
+        } catch (NullPointerException e) {
+            return "false";
+        }
+        String token = UUID.randomUUID().toString();
+        Integer exprie = RedisConstant.EXPIRE;
 
-    @RequestMapping("/printer/templates")
-    @ResponseBody
-    String test2() {
-        String template = "<init>\r\n" +
-                "<cnfont=48><usfont=12>{{printerName}}<bl=5>{{foodCategoryName}}<reset>\r\n" +
-                "点菜员： {{userName}}\r\n" +
-                "点单时间：{{date}}\r\n" +
-                "<hr>\r\n" +
-                "<cnfont=48><usfont=12>[foods].name<bl=4> [foods].num <bl=3>份 <reset>\r\n" +
-                "<cut>";
-        String template1 = "123";
-        String str = "[{" +
-                "\"id\": 1," +
-                "\"templateid\": \"01\"," +
-                "\"name\": \"hi苹果店\"," +
-                "\"content\":" + "\"" + template + "\"" +
-                "}]";
-        return str;
+        redisTemplate.opsForValue().set(String.format(RedisConstant.TOKEN_PREFIX, token), username, exprie, TimeUnit.SECONDS);
+        CookieUntil.set(response, CookieConstant.TOKEN, token, exprie);
+
+        return "ok";
     }
 }
