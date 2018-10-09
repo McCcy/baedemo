@@ -4,6 +4,8 @@ import com.kirito.demo.dao.ArticleDao;
 import com.kirito.demo.entity.ArticleDO;
 import com.kirito.demo.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,12 +15,14 @@ import java.util.List;
  * 2018/7/29 8:25
  */
 @Service
+@CacheConfig(cacheNames = "article1")
 public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private ArticleDao articleDao;
 
     @Override
+    @Cacheable(key = "123")
     public List<ArticleDO> getArticles() {
         return articleDao.getArticles();
     }
